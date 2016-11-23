@@ -15,8 +15,7 @@ typedef struct Table {
 #define false 0
 
 #define fail_if(condition, message) if(condition) {fprintf(stderr, message); exit(EXIT_FAILURE);}
-#define fail_if_bad_table(table,a,b,i,j) forn(i,a) forn(j,b) fail_if()
-#define forn(i, n) for (i = 0; i < (int)(n); ++i)
+#define forn(i,n) for (i = 0; i < (int)(n); ++i)
 
 void printNormal(FILE* stream, Table* table) {
 	int i,j;
@@ -96,12 +95,10 @@ int new_cell_value(int state, int count[3]) {
 	return -1;
 }
 
-void from_second_to_first(Table* table) {
-	int i,j;
-	forn(i,table->rows) forn(j, table->columns) {
-		table->first[i][j] = table->second[i][j];
-		fail_if(table->first[i][j] < 0 || table->first[i][j] > 2, "wrong table values (update_table)\n");
-	}
+void swap_tables(Table* table) {
+	int** temp = table->first;
+	table->first = table->second;
+	table->second = temp;
 }
 
 int life_iter(Table* table, bool isTorus) {
@@ -116,8 +113,7 @@ int life_iter(Table* table, bool isTorus) {
 		table->second[i][j] = new_cell_value(table->first[i][j], count);
 	}
 	
-	from_second_to_first(table);
-	
+	swap_tables(table);
 	return 0;
 }
 
@@ -126,7 +122,6 @@ int main(int argc, char** argv) {
 	FILE* out = fopen("life.dat", "w");
 	fail_if(!in, "file state.dat wasn't found\n");
 	fail_if(!out, "file life.dat wasn't created\n");
-	
 	
 	int i=-1, j=-1, x, y; Table table;
 	fscanf(in, "%d%d", &table.rows, &table.columns);
@@ -139,7 +134,7 @@ int main(int argc, char** argv) {
 	}
 	
 	#define MAX_THREADS 20
-	#define ITER 100000
+	#define ITER 10000
 	double begin,end;
 	for(i = 1; i <= MAX_THREADS; ++i) {
 		omp_set_num_threads(i);
@@ -148,5 +143,6 @@ int main(int argc, char** argv) {
 		end = omp_get_wtime();
 		printf("%d\t%lf\n", i, end-begin);
 	}
+	printState(out, &table);
 	return 0;
 }

@@ -1,0 +1,6 @@
+-> draw configuration
+-> Graph Acceleration(Threads number)
+-> Graph Efficiency(Cores)
+
+P.S. Use gnuplot
+As the result -> life.emf
