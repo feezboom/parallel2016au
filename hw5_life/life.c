@@ -10,22 +10,15 @@ typedef struct Table {
 	int columns;
 } Table;
 
-#define bool int
+typedef int bool;
 #define true 1
 #define false 0
 
 #define fail_if(condition, message) if(condition) {fprintf(stderr, message); exit(EXIT_FAILURE);}
-#define forn(i,n) for (i = 0; i < (int)(n); ++i)
-
-void printNormal(FILE* stream, Table* table) {
-	int i,j;
-	forn(i,table->rows) forn(j,table->columns) 
-		fprintf(stream, "%d%s", table->first[i][j], j==table->columns-1 ? "\n" : " ");
-}
 
 void printState(FILE* stream, Table* table) {
 	int i,j;
-	forn(i,table->rows) forn(j,table->columns) 
+	for(i = 0; i < table->rows; ++i) for(j = 0; j < table->columns; ++j) 
 		if (table->first[i][j] == 1)
 			fprintf(stream, "%d %d\n", i, j);
 	printf("[%d %d]\n", table->rows, table->columns);
@@ -38,9 +31,9 @@ void alloc_table(Table* table) {
 	fail_if(table->first == NULL, "malloc problem\n");
 	fail_if(table->second == NULL, "malloc problem\n");
 		
-	#define array_set(ar,i,n,v) forn(i,n) (ar)[i] = v;
+	#define array_set(ar,i,n,v) for(i = 0; i < n; ++i) (ar)[i] = v;
 	int i,j;
-	forn(i,table->rows+2) {
+	for(i = 0; i < table->rows+2; ++i) {
 		table->first[i] = ((int*)malloc((table->columns+2)*sizeof(int)));
 		table->second[i] = ((int*)malloc((table->columns+2)*sizeof(int)));
 		
@@ -64,13 +57,19 @@ void alloc_table(Table* table) {
 	array_set(table->second[0], i, table->columns+2, 2);
 	array_set(table->second[table->rows+1], i, table->columns + 2, 2);
 	// move
-	forn(i, table->rows+2) {
+	for(i = 0; i < table->rows+2; ++i) {
 		table->first[i]++;
 		table->second[i]++;
 	}
 	table->first++;
 	table->second++;
 	table->fictive++;
+}
+
+void swap_tables(Table* table) {
+	int** temp = table->first;
+	table->first = table->second;
+	table->second = temp;
 }
 
 void count_cells(Table* t, int* count, int i, int j) {
@@ -95,19 +94,13 @@ int new_cell_value(int state, int count[3]) {
 	return -1;
 }
 
-void swap_tables(Table* table) {
-	int** temp = table->first;
-	table->first = table->second;
-	table->second = temp;
-}
-
 int life_iter(Table* table, bool isTorus) {
 	table->first[-1] = isTorus ? table->first[table->columns-1] : table->fictive;
 	table->first[table->columns] = isTorus ? table->first[0] : table->fictive;
 	
 	int i, j;
 	#pragma omp parallel for collapse(2)
-	forn(i,table->rows) forn(j,table->columns) {
+	for(i = 0; i < table->rows; ++i) for(j = 0; j < table->columns; ++j) {
 		int count[3] = {0,0,0};
 		count_cells(table, count, i, j);
 		table->second[i][j] = new_cell_value(table->first[i][j], count);
@@ -134,15 +127,15 @@ int main(int argc, char** argv) {
 	}
 	
 	#define MAX_THREADS 20
-	#define ITER 10000
+	#define ITER 4
 	double begin,end;
-	for(i = 1; i <= MAX_THREADS; ++i) {
-		omp_set_num_threads(i);
+	//for(i = 1; i <= MAX_THREADS; ++i) {
+		omp_set_num_threads(4);
 		begin = omp_get_wtime();
-		forn(j,ITER) life_iter(&table, false);
+		for(j = 0; j < atoi(argv[1]); ++j) life_iter(&table, false);
 		end = omp_get_wtime();
 		printf("%d\t%lf\n", i, end-begin);
-	}
+	//}
 	printState(out, &table);
 	return 0;
 }
