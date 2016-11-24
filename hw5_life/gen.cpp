@@ -1,7 +1,6 @@
 #include <fstream>
 #include <ctime> 
 #include <cstdlib>
-#include <cstdlib>
 
 #define fail_if(condition, message) if(condition) {fprintf(stdout, message); fflush(stdout); exit(EXIT_FAILURE);}
 

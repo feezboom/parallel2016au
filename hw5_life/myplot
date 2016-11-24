@@ -1,6 +1,0 @@
-#!/usr/local/bin/gnuplot
-
-set terminal canvas
-set output "$1"
-
-plot "life.dat" pt 5 ps 5.6

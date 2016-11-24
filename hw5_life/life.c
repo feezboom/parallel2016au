@@ -10,7 +10,7 @@ typedef struct Table {
 	int columns;
 } Table;
 
-typedef int bool;
+#define bool int
 #define true 1
 #define false 0
 
@@ -21,7 +21,6 @@ void printState(FILE* stream, Table* table) {
 	for(i = 0; i < table->rows; ++i) for(j = 0; j < table->columns; ++j) 
 		if (table->first[i][j] == 1)
 			fprintf(stream, "%d %d\n", i, j);
-	printf("[%d %d]\n", table->rows, table->columns);
 }
 
 void alloc_table(Table* table) {
@@ -127,14 +126,14 @@ int main(int argc, char** argv) {
 	}
 	
 	#define MAX_THREADS 20
-	#define ITER 4
+	#define ITER atoi(argv[1])
 	double begin,end;
 	//for(i = 1; i <= MAX_THREADS; ++i) {
-		omp_set_num_threads(4);
-		begin = omp_get_wtime();
-		for(j = 0; j < atoi(argv[1]); ++j) life_iter(&table, false);
-		end = omp_get_wtime();
-		printf("%d\t%lf\n", i, end-begin);
+		//omp_set_num_threads(4);
+		//begin = omp_get_wtime();
+		for(j = 0; j < ITER; ++j) life_iter(&table, false);
+		//end = omp_get_wtime();
+		//printf("%d\t%lf\n", i, end-begin);
 	//}
 	printState(out, &table);
 	return 0;

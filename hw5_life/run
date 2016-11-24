@@ -1,0 +1,23 @@
+#!/bin/bash
+
+ITER=501
+
+g++ gen.cpp -o gen
+gcc life.c -fopenmp -o life
+
+
+if [ ! -d states ]; then
+    mkdir states
+fi
+
+./gen 100 100
+
+i=0
+while [ $i -lt $ITER ];
+do
+	./life $i
+	mv life.dat states/life$i.dat
+	let i=i+1
+done
+
+./draw
