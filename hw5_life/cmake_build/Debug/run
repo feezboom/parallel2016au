@@ -1,23 +1,20 @@
 #!/bin/bash
 
-ITER=501
-
-g++ gen.cpp -o gen
-gcc life.c -fopenmp -o life
-
+ITER=500
 
 if [ ! -d states ]; then
     mkdir states
 fi
-
-./gen 100 100
+if [ ! -d images ]; then
+    mkdir images
+fi
 
 i=0
-while [ $i -lt $ITER ];
+while [ $i -le $ITER ];
 do
 	./life $i
 	mv life.dat states/life$i.dat
 	let i=i+1
 done
 
-./draw
+gnuplot -e "ITER=$ITER" draw
