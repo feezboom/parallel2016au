@@ -2,6 +2,10 @@
 
 ITER=500
 
+if [ "$#" -eq 0 ]; then
+	./gen 10 10
+fi
+
 if [ ! -d states ]; then
     mkdir states
 fi
@@ -11,9 +15,14 @@ fi
 
 i=0
 while [ $i -le $ITER ];
-do
-	./life $i
-	mv life.dat states/life$i.dat
+do	
+	if [ "$#" -eq 1 ]; then
+		./life $i $1
+		mv life.dat states/life$i.dat
+	elif [ "$#" -eq 0 ]; then
+		./life $i
+		mv life.dat states/life$i.dat
+	fi
 	let i=i+1
 done
 

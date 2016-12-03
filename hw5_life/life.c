@@ -13,7 +13,7 @@ typedef struct Table {
 #define true 1
 #define false 0
 
-#define fail_if(condition, message) if(condition) {fprintf(stderr, message); exit(EXIT_FAILURE);}
+#define fail_if(condition, message) if(condition) {fprintf(stderr, "%s\n", message); exit(EXIT_FAILURE);}
 
 void printState(FILE* stream, Table* table) {
     int i, j;
@@ -34,18 +34,12 @@ void alloc_table(Table* table) {
     int i,j;
     for(i = 0; i < table->rows; ++i) {
         table->first[i] = ((int*)malloc((table->columns)*sizeof(int)));
-        table->second[i] = ((int*)malloc((table->columns)*sizeof(int)));
-
         fail_if(table->first[i] == NULL, "malloc problem\n");
-        fail_if(table->second[i] == NULL, "malloc problem\n");
-
         array_set(table->first[i],j,table->columns,0);
+
+        table->second[i] = ((int*)malloc((table->columns)*sizeof(int)));
+        fail_if(table->second[i] == NULL, "malloc problem\n");
         array_set(table->second[i],j,table->columns,0);
-    }
-    // move
-    for(i = 0; i < table->rows; ++i) {
-        table->first[i]++;
-        table->second[i]++;
     }
 }
 
@@ -76,19 +70,24 @@ void count_cells(Table* t, int* count, int i, int j, bool isTorus) {
     if (rightj < t->columns) /*->*/ count[t->first[i][rightj]]++;
 }
 
-int new_cell_value(int state, int* count) {
+int new_cell_value(int state, int count[2]) {
     if (state == 0) {
-        if (count[1] == 3) return 1;
-        else return 0;
+        if (count[1] == 3)
+            return 1;
+        else
+            return 0;
     } else if (state == 1) {
-        if (count[1] == 2 || count[1] == 3) return 1;
-        else return 0;
-    } else fail_if(false, "not possible cell value\n");
-    return -1;
+        if (count[1] == 2 || count[1] == 3)
+            return 1;
+        else
+            return 0;
+    } else {
+        fail_if(true, "not possible cell value");
+    }
+    fail_if(true, "unreachable code");
 }
 
 int life_iter(Table* table, bool isTorus) {
-
     int i, j;
 	#pragma omp parallel for collapse(2)
     for(i = 0; i < table->rows; ++i) {
@@ -98,32 +97,32 @@ int life_iter(Table* table, bool isTorus) {
             table->second[i][j] = new_cell_value(table->first[i][j], count);
         }
     }
-
     swap_tables(table);
     return 0;
 }
 
 int main(int argc, char** argv) {
-    FILE* in = fopen("state.dat", "r");
+    fail_if(argc < 2, "at least 1 argument needed");
+    FILE* in = (argc == 2) ? fopen("state.dat", "r") : fopen(argv[2],"r");
     FILE* out = fopen("life.dat", "w");
 
-    fail_if(!in, "file state.dat wasn't found\n");
-    fail_if(!out, "file life.dat wasn't created\n");
+    fail_if(!in, "file state.dat wasn't found");
+    fail_if(!out, "file life.dat wasn't created");
 
-    int j=-1, x, y; Table table;
+    int j, x, y; Table table;
     fscanf(in, "%d %d", &table.rows, &table.columns);
-    fail_if(table.rows <= 0 || table.columns <= 0, "wrong initial sizes\n");
+    fail_if(table.rows <= 0 || table.columns <= 0, "wrong initial sizes");
     alloc_table(&table);
 
     while(fscanf(in, "%d %d", &x, &y) != EOF) { // init table
-        fail_if(x < 0 || x >= table.rows || y < 0 || y >= table.columns, "wrong input given in state.dat\n");
+        fail_if(x < 0 || x >= table.rows || y < 0 || y >= table.columns, "wrong input given in state.dat");
         table.first[x][y] = 1;
     }
 
-    fail_if(argc < 2, "at least 1 argument needed\n");
-#define ITER atoi(argv[1])
-    omp_set_num_threads(1);
+    const int ITER = atoi(argv[1]);
+    fail_if(ITER < 0, "wrong iterations number given");
 
+    omp_set_num_threads(4);
     for(j = 0; j < ITER; ++j) {
         life_iter(&table, true);
     }
