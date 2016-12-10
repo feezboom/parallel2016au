@@ -3,7 +3,7 @@
 ITER=500
 
 if [ "$#" -eq 0 ]; then
-	./gen 10 10
+	./gen 100 100
 fi
 
 if [ ! -d states ]; then

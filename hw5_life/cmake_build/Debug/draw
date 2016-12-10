@@ -1,8 +1,8 @@
 #!/usr/bin/env gnuplot
 
 # RANGE PARAMETERS
-set xrange [0:9]
-set yrange [0:9]
+set xrange [0:99]
+set yrange [0:99]
 #set autoscale xy
 
 # THINK YOU SHOULDN'T TOUCH IT
@@ -14,7 +14,7 @@ set size
 
 
 #POINTS PARAMETERS
-point_size = 10 #[0:5] 23.1665; [0:10] 9;
+point_size = 1#10 #[0:5] 23.1665; [0:10] 9;
 point_type = 5
 points_color = 'black'
 
