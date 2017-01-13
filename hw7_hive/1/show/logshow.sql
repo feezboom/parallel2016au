@@ -1,0 +1,3 @@
+USE s49603;
+
+SELECT * FROM userLogs LIMIT 10

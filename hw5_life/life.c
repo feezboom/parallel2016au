@@ -104,10 +104,8 @@ int life_iter(Table* table, bool isTorus) {
 int main(int argc, char** argv) {
     fail_if(argc < 2, "at least 1 argument needed");
     FILE* in = (argc == 2) ? fopen("state.dat", "r") : fopen(argv[2],"r");
-    FILE* out = fopen("life.dat", "w");
 
     fail_if(!in, "file state.dat wasn't found");
-    fail_if(!out, "file life.dat wasn't created");
 
     int j, x, y; Table table;
     fscanf(in, "%d %d", &table.rows, &table.columns);
@@ -123,10 +121,17 @@ int main(int argc, char** argv) {
     fail_if(ITER < 0, "wrong iterations number given");
 
     omp_set_num_threads(4);
-    for(j = 0; j < ITER; ++j) {
+    char filename[1024];
+
+    for(j = 0; j <= ITER; ++j) {
         life_iter(&table, true);
+	sprintf(filename, "./states/life%d.dat", j);
+	FILE* out = fopen(filename, "w");
+    	fail_if(!out, "file life.dat wasn't created");
+	printState(out, &table);
+	fclose(out);
     }
 
-    printState(out, &table);
+    //printState(out, &table);
     return 0;
 }

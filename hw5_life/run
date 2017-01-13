@@ -1,0 +1,29 @@
+#!/bin/bash
+
+ITER=10000
+
+if [ "$#" -eq 0 ]; then
+	./gen 100 100
+fi
+
+if [ ! -d states ]; then
+    mkdir states
+fi
+if [ ! -d images ]; then
+    mkdir images
+fi
+
+g++ life.c -fopenmp -o life
+
+#i=0
+#while [ $i -le $ITER ];
+#do	
+if [ "$#" -eq 1 ]; then
+	./life $ITER $1
+elif [ "$#" -eq 0 ]; then
+	./life $ITER
+fi
+#	let i=i+1
+#done
+
+gnuplot -e "ITER=$ITER" draw
